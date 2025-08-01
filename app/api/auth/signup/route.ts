@@ -1,47 +1,45 @@
-import { type NextRequest, NextResponse } from "next/server"
-import bcrypt from "bcryptjs"
-import { prisma } from "@/lib/prisma"
-import { signUpSchema } from "@/lib/validations"
+import { NextResponse } from "next/server";
+import bcrypt from "bcrypt";
+import { z } from "zod";
+import { PrismaClient } from "@/app/generated/prisma";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { name, email, password } = signUpSchema.parse(body)
+const prisma = new PrismaClient();
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    })
+export async function POST(req: Request) {
+  const data = await req.json();
 
-    if (existingUser) {
-      return NextResponse.json({ error: "User already exists" }, { status: 400 })
-    }
+  const schema = z.object({
+    email: z.string().email(),
+    password: z.string().min(6),
+    name: z.string(),
+  });
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
+  const { email, password, name } = schema.parse(data);
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: "USER",
-        status: "ACTIVE",
-      },
-    })
+  const exist = await prisma.users.findUnique({
+    where: { email },
+  });
 
-    return NextResponse.json({
-      message: "User created successfully",
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    })
-  } catch (error) {
-    console.error("Signup error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  if (exist) {
+    return NextResponse.json({ error: "User already exists" }, { status: 400 });
   }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = await prisma.users.create({
+    data: {
+      email,
+      password: hashedPassword,
+      name,
+    },
+  });
+
+  // ⬇️ Call the send-otp API after user is created
+  await fetch(`${process.env.BASE_URL}/api/auth/send-otp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  return NextResponse.json({ user });
 }
