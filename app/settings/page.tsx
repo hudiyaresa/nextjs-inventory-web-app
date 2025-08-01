@@ -30,7 +30,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push("/auth/signin")
+      router.push("/signin")
     } else if (user) {
       setProfileData((prev) => ({
         ...prev,

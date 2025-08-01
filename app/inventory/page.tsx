@@ -22,7 +22,7 @@ export default function InventoryPage() {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push("/auth/signin")
+      router.push("/signin")
     }
   }, [user, isLoading, router])
 
