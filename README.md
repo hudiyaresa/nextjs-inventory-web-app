@@ -7,21 +7,20 @@ A comprehensive inventory management system built with Next.js, TypeScript, Pris
 
 ## Table of Contents
 
-1. [Features](#features)
-1.1 [Core Functionality](#core-functionality)
-1.2 [Authentication & Security](#authentication--security)
-1.3 [User Experience](#user-experience)
-1.4 [Admin Features](#admin-features)
+## Table of Contents
 
+1. [Features](#features)
+   1. [Core Functionality](#core-functionality)
+   2. [Authentication & Security](#authentication--security)
+   3. [User Experience](#user-experience)
+   4. [Admin Features](#admin-features)
 2. [Technology Stack](#technology-stack)
 3. [Prerequisites](#prerequisites)
-
 4. [Getting Started](#getting-started)
-4.1 [Clone and Install](#1-clone-and-install)
-4.2 [Environment Setup](#2-environment-setup)
-4.3 [Database Setup](#3-database-setup)
-4.4 [Run Development Server](#4-run-development-server)
-
+   1. [Clone and Install](#1-clone-and-install)
+   2. [Environment Setup](#2-environment-setup)
+   3. [Database Setup](#3-database-setup)
+   4. [Run Development Server](#4-run-development-server)
 5. [Database Schema](#database-schema)
 6. [User Roles & Permissions](#user-roles--permissions)
 7. [Key Features Explained](#key-features-explained)
@@ -32,6 +31,7 @@ A comprehensive inventory management system built with Next.js, TypeScript, Pris
 12. [Analytics Dashboard](#analytics-dashboard)
 13. [Deployment](#deployment)
 14. [Contributing](#contributing)
+
 
 ---
 
