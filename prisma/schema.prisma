@@ -90,7 +90,7 @@ model InventoryItem {
   destination      String?
   quantity         Int
   description      String?
-  expiryDate       DateTime  @default(dbgenerated("'9999-12-31'::date"))
+  expiryDate       DateTime?  @default(dbgenerated("'9999-12-31'::date"))
   unitPrice        Decimal?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt

@@ -349,3 +349,7 @@ npm start
    git push origin feature/amazing-feature
    ```
 5. Submit a Pull Request
+
+## Current Error Documentation
+![Neon_DB](docs/neon_db_stats.png)
+![Oauth_Error](docs/Oauth_Error.gif)
