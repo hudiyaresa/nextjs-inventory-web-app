@@ -1,112 +1,150 @@
+
 # Advanced Inventory Management System
 
 A comprehensive inventory management system built with Next.js, TypeScript, Prisma, and PostgreSQL. Features real-time tracking, advanced analytics, role-based authentication, and enterprise-grade security.
 
+---
+
+## Table of Contents
+
+1. [Features](#features)
+   1.1 [Core Functionality](#core-functionality)
+   1.2 [Authentication & Security](#authentication--security)
+   1.3 [User Experience](#user-experience)
+   1.4 [Admin Features](#admin-features)
+2. [Technology Stack](#technology-stack)
+3. [Prerequisites](#prerequisites)
+4. [Getting Started](#getting-started)
+   4.1 [Clone and Install](#1-clone-and-install)
+   4.2 [Environment Setup](#2-environment-setup)
+   4.3 [Database Setup](#3-database-setup)
+   4.4 [Run Development Server](#4-run-development-server)
+5. [Database Schema](#database-schema)
+6. [User Roles & Permissions](#user-roles--permissions)
+7. [Key Features Explained](#key-features-explained)
+8. [Development Commands](#development-commands)
+9. [API Endpoints](#api-endpoints)
+10. [UI Components](#ui-components)
+11. [Security Features](#security-features)
+12. [Analytics Dashboard](#analytics-dashboard)
+13. [Deployment](#deployment)
+14. [Contributing](#contributing)
+
+---
+
 ## Features
 
-### Core Functionality
-- **Advanced Inventory Tracking**: Complete item management with UUID, categories, sources, quantities, expiry dates, and pricing
-- **Smart Alerts**: Low stock warnings and expiry date notifications with conditional formatting
-- **Soft Delete**: All records use soft delete (deletedAt timestamp) for data recovery
-- **Custom Categories**: Admin-managed category system with full CRUD operations
-- **Audit Logging**: Complete change tracking with user attribution
+### 1. Core Functionality
 
-### Authentication & Security
-- **Multiple Auth Methods**: 
-  - Google OAuth integration
-  - Email/Password with bcrypt hashing
-  - OTP (One-Time Password) via email
-- **Role-Based Access**: USER and ADMIN roles with granular permissions
-- **Account Management**: User activation/deactivation system
-- **Session Management**: Secure JWT-based sessions with NextAuth.js
+* Advanced inventory tracking (UUID, categories, sources, quantities, expiry, pricing)
+* Smart alerts for low stock and expiry dates
+* Soft delete system with `deletedAt` timestamp
+* Custom categories with admin CRUD
+* Audit logging with full change tracking
 
-### User Experience
-- **Dark Theme**: Default dark mode with system preference support
-- **Responsive Design**: Mobile-first design with Tailwind CSS
-- **Performance Optimized**: 
-  - React Suspense for partial rendering
-  - Skeleton loaders for better perceived performance
-  - Pagination for large datasets
-- **Multiple View Types**: Toggle between list and card views
-- **Advanced Search**: Multi-attribute search and filtering
+### 2. Authentication & Security
 
-### Admin Features
-- **User Management**: Create, edit, delete users and reset passwords
-- **Category Management**: Full CRUD operations for inventory categories
-- **System Analytics**: Comprehensive dashboard with charts and statistics
-- **Audit Trail**: View all system changes and user activities
+* Multiple authentication methods:
 
-## 🛠 Technology Stack
+  * Google OAuth
+  * Email/password (bcrypt)
+  * OTP via email
+* Role-based access (USER & ADMIN)
+* Account activation/deactivation
+* JWT-based session management with NextAuth.js
 
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, Prisma ORM
-- **Database**: PostgreSQL (Neon hosting)
-- **Authentication**: NextAuth.js with Google OAuth
-- **Email**: Nodemailer with SMTP
-- **Validation**: Zod schema validation
-- **Charts**: Recharts for data visualization
-- **UI Components**: Radix UI primitives
+### 3. User Experience
+
+* Dark mode with system theme support
+* Mobile-first responsive design with Tailwind CSS
+* Performance optimizations:
+
+  * React Suspense
+  * Skeleton loaders
+  * Server-side pagination
+* List and card view toggle
+* Advanced search with filters
+
+### 4. Admin Features
+
+* User management (create/edit/delete/reset password)
+* Category management (CRUD)
+* System analytics dashboard
+* Full audit trail and activity logs
+
+---
+
+## Technology Stack
+
+* **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+* **Backend**: Next.js API Routes, Prisma ORM
+* **Database**: PostgreSQL (Neon)
+* **Authentication**: NextAuth.js
+* **Email**: Nodemailer (SMTP)
+* **Validation**: Zod
+* **Charts**: Recharts
+* **UI**: Radix UI
+
+---
 
 ## Prerequisites
 
-- Node.js 18+ 
-- PostgreSQL database (Neon recommended)
-- Google OAuth credentials
-- SMTP email credentials
+* Node.js 18+
+* PostgreSQL database (Neon recommended)
+* Google OAuth credentials
+* SMTP email credentials
+
+---
 
 ## Getting Started
 
 ### 1. Clone and Install
-\`\`\`bash
+
+```bash
 git clone <repository-url>
 cd inventory-management-system
 npm install
-\`\`\`
+```
 
 ### 2. Environment Setup
-Create `.env.local`:
-\`\`\`env
-# Database
-DATABASE_URL="postgresql://username:password@host:port/database"
 
-# NextAuth
+Create `.env.local`:
+
+```env
+DATABASE_URL="postgresql://username:password@host:port/database"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-secret-key"
-
-# Google OAuth
 GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
-
-# Email (SMTP)
 EMAIL_USER="your-email@gmail.com"
 EMAIL_PASSWORD="your-app-password"
-\`\`\`
+```
 
 ### 3. Database Setup
-\`\`\`bash
-# Generate Prisma client
+
+```bash
 npx prisma generate
-
-# Push schema to database
 npx prisma db push
-
-# Seed database with sample data
 npx prisma db seed
-\`\`\`
+```
 
 ### 4. Run Development Server
-\`\`\`bash
-npm run dev
-\`\`\`
 
-Visit `http://localhost:3000`
+```bash
+npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000)
+
+---
 
 ## Database Schema
 
 ### Core Models
 
 #### User
-\`\`\`prisma
+
+```prisma
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -118,10 +156,11 @@ model User {
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime? // Soft delete
 }
-\`\`\`
+```
 
 #### InventoryItem
-\`\`\`prisma
+
+```prisma
 model InventoryItem {
   id               String    @id @default(cuid())
   itemName         String
@@ -138,10 +177,11 @@ model InventoryItem {
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime? // Soft delete
 }
-\`\`\`
+```
 
 #### Category
-\`\`\`prisma
+
+```prisma
 model Category {
   id        String   @id @default(cuid())
   name      String   @unique
@@ -149,130 +189,163 @@ model Category {
   createdAt DateTime @default(now())
   deletedAt DateTime? // Soft delete
 }
-\`\`\`
+```
+
+---
 
 ## User Roles & Permissions
 
-### USER Role
-- View and manage own inventory items
-- Add new inventory items
-- Edit/delete own items
-- View public catalog
-- Access personal dashboard
+### USER
 
-### ADMIN Role
-- All USER permissions
-- Manage all users (create, edit, delete, activate/deactivate)
-- Manage categories (create, edit, delete)
-- View system-wide analytics
-- Access audit logs
-- Reset user passwords
+* Manage own inventory
+* Add/edit/delete own items
+* Access personal dashboard
+* View public catalog
+
+### ADMIN
+
+* All USER permissions
+* Manage users (create/edit/delete/activate)
+* Manage categories
+* Access analytics & audit logs
+* Reset user passwords
+
+---
 
 ## Key Features Explained
 
-### Soft Delete System
-All deletions are soft deletes using `deletedAt` timestamp:
-- Records remain in database for recovery
-- Filtered out from normal queries
-- Admin can view/restore deleted items
+### 1. Soft Delete System
 
-### Smart Alerts
-Conditional formatting for inventory items:
-- **Red**: Expired items or critical low stock
-- **Orange**: Items expiring within 30 days
-- **Yellow**: Low stock warnings (< 10 items)
+* Keeps deleted records for recovery
+* Filtered from queries by default
+* Admins can restore items
 
-### OTP Authentication
-Email-based OTP system:
-- 6-digit codes with 10-minute expiry
-- Secure SMTP delivery via Nodemailer
-- Alternative to password authentication
+### 2. Smart Alerts
 
-### Pagination & Performance
-- Server-side pagination for large datasets
-- Skeleton loaders during data fetching
-- React Suspense for progressive loading
-- Optimized database queries
+* Red: expired or critical stock
+* Orange: expiring within 30 days
+* Yellow: stock < 10
+
+### 3. OTP Authentication
+
+* 6-digit email-based codes
+* 10-minute expiration
+* Delivered securely via SMTP
+
+### 4. Pagination & Performance
+
+* Server-side pagination
+* Skeleton loaders
+* Optimized database queries
+* Progressive loading with React Suspense
+
+---
 
 ## Development Commands
 
-\`\`\`bash
-# Development
+```bash
+# Dev server
 npm run dev
 
 # Database
-npm run db:push      # Push schema changes
-npm run db:seed      # Seed database
-npm run db:studio    # Open Prisma Studio
-npm run db:generate  # Generate Prisma client
+npm run db:push
+npm run db:seed
+npm run db:studio
+npm run db:generate
 
-# Build
+# Production
 npm run build
 npm start
-\`\`\`
+```
+
+---
 
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/signup` - User registration
-- `POST /api/auth/otp/send` - Send OTP
-- `POST /api/auth/otp/verify` - Verify OTP
+
+* `POST /api/auth/signup` – Register user
+* `POST /api/auth/otp/send` – Send OTP
+* `POST /api/auth/otp/verify` – Verify OTP
 
 ### Inventory
-- `GET /api/inventory` - List items (paginated)
-- `POST /api/inventory` - Create item
-- `PUT /api/inventory/[id]` - Update item
-- `DELETE /api/inventory/[id]` - Soft delete item
+
+* `GET /api/inventory` – Paginated list
+* `POST /api/inventory` – Create item
+* `PUT /api/inventory/[id]` – Update item
+* `DELETE /api/inventory/[id]` – Soft delete
 
 ### Admin
-- `GET /api/admin/users` - List users
-- `PUT /api/admin/users/[id]` - Update user
-- `DELETE /api/admin/users/[id]` - Soft delete user
+
+* `GET /api/admin/users` – List users
+* `PUT /api/admin/users/[id]` – Update user
+* `DELETE /api/admin/users/[id]` – Soft delete user
+
+---
 
 ## UI Components
 
-Built with Radix UI primitives and custom components:
-- Responsive navigation with role-based menus
-- Advanced data tables with sorting/filtering
-- Modal dialogs for confirmations
-- Toast notifications for user feedback
-- Skeleton loaders for better UX
+* Role-based responsive navigation
+* Custom data tables (sortable/filterable)
+* Confirmation modals
+* Toast notifications
+* Skeleton placeholders
+
+---
 
 ## Security Features
 
-- **Password Hashing**: bcrypt with salt rounds
-- **Input Validation**: Zod schemas on client and server
-- **SQL Injection Protection**: Prisma ORM parameterized queries
-- **CSRF Protection**: NextAuth.js built-in protection
-- **Rate Limiting**: Built-in API route protection
+* Password hashing with bcrypt
+* Input validation using Zod
+* SQL injection protection (Prisma ORM)
+* CSRF protection via NextAuth.js
+* API rate limiting
+
+---
 
 ## Analytics Dashboard
 
-Real-time charts and statistics:
-- Total inventory value and count
-- Items by category (bar chart)
-- Stock level distribution (pie chart)
-- Daily additions trend
-- Low stock and expiry alerts
+* Inventory value and item count
+* Bar charts by category
+* Pie charts for stock levels
+* Daily trend visualizations
+* Low stock and expiry alerts
+
+---
 
 ## Deployment
 
 ### Vercel (Recommended)
-1. Connect GitHub repository
+
+1. Connect your GitHub repo
 2. Add environment variables
-3. Deploy automatically
+3. Deploy directly via Vercel
 
 ### Manual Deployment
-\`\`\`bash
+
+```bash
 npm run build
 npm start
-\`\`\`
+```
+
+---
 
 ## Contributing
 
 1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+2. Create your branch:
 
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. Commit your changes:
+
+   ```bash
+   git commit -m 'Add amazing feature'
+   ```
+4. Push to GitHub:
+
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+5. Submit a Pull Request

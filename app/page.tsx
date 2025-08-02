@@ -138,7 +138,7 @@ export default function HomePage() {
               Join businesses worldwide using our advanced inventory management system
             </p>
             <Button size="lg" asChild>
-              <Link href="/auth/signup">Start Your Free Trial</Link>
+              <Link href="/signup">Get Started</Link>
             </Button>
           </div>
         </div>
