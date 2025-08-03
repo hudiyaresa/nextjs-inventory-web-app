@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   await prisma.otps.delete({ where: { id: otpRecord.id } });
 
    // ✅ update verifiedAt
-  await prisma.users.update({
+  await prisma.user.update({
     where: { id: user.id },
     data: { verifiedAt: new Date() },
   });

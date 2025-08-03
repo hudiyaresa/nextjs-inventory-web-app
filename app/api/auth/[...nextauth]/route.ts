@@ -35,7 +35,7 @@ const authOptions: NextAuthOptions = {
 
           const { email, password } = schema.parse(credentials);
 
-          const user = await prisma.users.findUnique({ where: { email } });
+          const user = await prisma.user.findUnique({ where: { email } });
           if (!user || !user.password || !user.verifiedAt) return null;
 
           const valid = await bcrypt.compare(password, user.password);
@@ -59,12 +59,12 @@ const authOptions: NextAuthOptions = {
         if (account?.provider === "google") {
           if (!user.email) return false;
 
-          const existingUser = await prisma.users.findUnique({
+          const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
           });
 
           if (!existingUser) {
-            await prisma.users.create({
+            await prisma.user.create({
               data: {
                 name: user.name || "",
                 email: user.email,
@@ -72,7 +72,7 @@ const authOptions: NextAuthOptions = {
               },
             });
           } else if (!existingUser.verifiedAt) {
-            await prisma.users.update({
+            await prisma.user.update({
               where: { email: user.email },
               data: { verifiedAt: new Date() },
             });
@@ -81,8 +81,8 @@ const authOptions: NextAuthOptions = {
 
         return true;
       } catch (error) {
-        console.error("signIn callback error:", error);
-        return false;
+        console.error("SIGNIN ERROR", error);
+        return false; // Returning false triggers AccessDenied
       }
     },
     async jwt({ token, user }) {
