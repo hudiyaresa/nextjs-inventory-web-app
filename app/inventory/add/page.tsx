@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
@@ -13,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { categories, sources } from "@/lib/inventory-data"
+import { sources, getSourceLabel } from "@/lib/inventory-data"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -22,10 +20,11 @@ export default function AddInventoryPage() {
   const router = useRouter()
   const { toast } = useToast()
 
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [formData, setFormData] = useState({
     itemName: "",
     brand: "",
-    category: "",
+    categoryId: "",
     source: "",
     quantity: "",
     description: "",
@@ -39,19 +38,38 @@ export default function AddInventoryPage() {
     }
   }, [user, isLoading, router])
 
-  if (isLoading) {
-    return <div>Loading...</div>
+  // Fetch categories from API
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const res = await fetch("/api/category")
+        if (!res.ok) throw new Error("Failed to fetch categories")
+        const data = await res.json()
+        setCategories(data)
+      } catch (error) {
+        console.error("Failed to load categories:", error)
+        toast({
+          title: "Error",
+          description: "Failed to load categories.",
+          variant: "destructive",
+        })
+      }
+    }
+
+    fetchCategories()
+  }, [toast])
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
   }
 
-  if (!user) {
-    return null
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Basic validation
-    if (!formData.itemName || !formData.brand || !formData.category || !formData.source || !formData.quantity) {
+    if (!formData.itemName || !formData.brand || !formData.categoryId || !formData.source || !formData.quantity) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -60,21 +78,53 @@ export default function AddInventoryPage() {
       return
     }
 
-    // In a real app, this would make an API call
-    toast({
-      title: "Item Added",
-      description: `${formData.itemName} has been added to your inventory.`,
-    })
+    if (!user) {
+      toast({
+        title: "Authentication Error",
+        description: "User not authenticated.",
+        variant: "destructive",
+      })
+      return
+    }
 
-    router.push("/inventory")
+    try {
+      const payload = {
+        itemName: formData.itemName,
+        brand: formData.brand,
+        categoryId: formData.categoryId,
+        source: formData.source,
+        quantity: parseInt(formData.quantity),
+        description: formData.description || null,
+        expiryDate: formData.expiryDate ? new Date(formData.expiryDate).toISOString() : null,
+        unitPrice: formData.unitPrice ? parseFloat(formData.unitPrice) : null,
+        lastModifiedBy: user.id,
+      }
+
+      const res = await fetch("/api/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+
+      if (!res.ok) throw new Error("Failed to add item")
+
+      toast({
+        title: "Item Added",
+        description: `${formData.itemName} has been added to inventory.`,
+      })
+
+      router.push("/inventory")
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to add item. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
-  }
+  if (isLoading) return <div>Loading...</div>
+  if (!user) return null
 
   return (
     <div className="min-h-screen bg-background">
@@ -125,15 +175,18 @@ export default function AddInventoryPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="category">Category *</Label>
-                    <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                    <Label htmlFor="categoryId">Category *</Label>
+                    <Select
+                      value={formData.categoryId}
+                      onValueChange={(value) => handleInputChange("categoryId", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -141,14 +194,17 @@ export default function AddInventoryPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="source">Source *</Label>
-                    <Select value={formData.source} onValueChange={(value) => handleInputChange("source", value)}>
+                    <Select
+                      value={formData.source}
+                      onValueChange={(value) => handleInputChange("source", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select source" />
                       </SelectTrigger>
                       <SelectContent>
                         {sources.map((source) => (
                           <SelectItem key={source} value={source}>
-                            {source.charAt(0).toUpperCase() + source.slice(1)}
+                            {getSourceLabel(source)}
                           </SelectItem>
                         ))}
                       </SelectContent>
