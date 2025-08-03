@@ -15,6 +15,7 @@ async function main() {
       password: adminPassword,
       role: "ADMIN",
       status: "ACTIVE",
+      verifiedAt: new Date("2025-08-01")
     },
   });
 
@@ -29,6 +30,7 @@ async function main() {
       password: userPassword,
       role: "USER",
       status: "ACTIVE",
+      verifiedAt: new Date("2025-08-01")      
     },
   });
 
