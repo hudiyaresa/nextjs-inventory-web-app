@@ -356,5 +356,6 @@ npm start
 ## Current Error Documentation
 ![Neon_DB](docs/neon_db_stats.png)
 
+![Oauth_Error](docs/Oauth_Error.gif)
 
-update: current bug, we can login via google, but cannot login via email...
+update: current bug, we can login via google (locally), but cannot login via email...
