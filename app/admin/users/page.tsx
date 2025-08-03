@@ -54,7 +54,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState(mockUsers)
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "admin")) {
+    if (!isLoading && (!user || user.role !== "ADMIN")) {
       router.push("/dashboard")
     }
   }, [user, isLoading, router])
@@ -63,26 +63,26 @@ export default function AdminUsersPage() {
     return <div>Loading...</div>
   }
 
-  if (!user || user.role !== "admin") {
+  if (!user || user.role !== "ADMIN") {
     return null
   }
 
   const toggleUserStatus = (userId: string) => {
     setUsers((prevUsers) =>
-      prevUsers.map((u) => (u.id === userId ? { ...u, status: u.status === "active" ? "inactive" : "active" } : u)),
+      prevUsers.map((u) => (u.id === userId ? { ...u, status: u.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" } : u)),
     )
 
     const targetUser = users.find((u) => u.id === userId)
-    const newStatus = targetUser?.status === "active" ? "inactive" : "active"
+    const newStatus = targetUser?.status === "ACTIVE" ? "INACTIVE" : "ACTIVE"
 
     toast({
       title: "User Status Updated",
-      description: `User has been ${newStatus === "active" ? "activated" : "deactivated"}.`,
+      description: `User has been ${newStatus === "ACTIVE" ? "activated" : "deactivated"}.`,
     })
   }
 
-  const activeUsers = users.filter((u) => u.status === "active").length
-  const inactiveUsers = users.filter((u) => u.status === "inactive").length
+  const activeUsers = users.filter((u) => u.status === "ACTIVE").length
+  const inactiveUsers = users.filter((u) => u.status === "INACTIVE").length
 
   return (
     <div className="min-h-screen bg-background">
@@ -158,12 +158,12 @@ export default function AdminUsersPage() {
                       <TableCell className="font-medium">{userData.username}</TableCell>
                       <TableCell>{userData.email}</TableCell>
                       <TableCell>
-                        <Badge variant={userData.role === "admin" ? "default" : "secondary"}>
+                        <Badge variant={userData.role === "ADMIN" ? "default" : "secondary"}>
                           {userData.role.charAt(0).toUpperCase() + userData.role.slice(1)}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={userData.status === "active" ? "default" : "destructive"}>
+                        <Badge variant={userData.status === "ACTIVE" ? "default" : "destructive"}>
                           {userData.status.charAt(0).toUpperCase() + userData.status.slice(1)}
                         </Badge>
                       </TableCell>
@@ -172,10 +172,10 @@ export default function AdminUsersPage() {
                         {userData.id !== user.id && (
                           <Button
                             size="sm"
-                            variant={userData.status === "active" ? "destructive" : "default"}
+                            variant={userData.status === "ACTIVE" ? "destructive" : "default"}
                             onClick={() => toggleUserStatus(userData.id)}
                           >
-                            {userData.status === "active" ? "Deactivate" : "Activate"}
+                            {userData.status === "ACTIVE" ? "Deactivate" : "Activate"}
                           </Button>
                         )}
                         {userData.id === user.id && <span className="text-sm text-muted-foreground">Current User</span>}

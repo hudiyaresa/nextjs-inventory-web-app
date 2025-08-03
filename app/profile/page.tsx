@@ -75,7 +75,7 @@ export default function ProfilePage() {
                     <Shield className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Role</span>
                   </div>
-                  <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                  <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
                     {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                   </Badge>
                 </div>
@@ -85,7 +85,7 @@ export default function ProfilePage() {
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Status</span>
                   </div>
-                  <Badge variant={user.status === "active" ? "default" : "destructive"}>
+                  <Badge variant={user.status === "ACTIVE" ? "default" : "destructive"}>
                     {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
                   </Badge>
                 </div>
@@ -126,7 +126,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Admin Features */}
-          {user.role === "admin" && (
+          {user.role === "ADMIN" && (
             <Card>
               <CardHeader>
                 <CardTitle>Administrator Features</CardTitle>

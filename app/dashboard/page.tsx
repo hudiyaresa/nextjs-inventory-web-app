@@ -175,7 +175,7 @@ export default function DashboardPage() {
               <Button variant="outline" asChild>
                 <Link href="/inventory">View All Items</Link>
               </Button>
-              {user.role === "admin" && (
+              {user.role === "ADMIN" && (
                 <Button variant="outline" asChild>
                   <Link href="/admin/users">Manage Users</Link>
                 </Button>

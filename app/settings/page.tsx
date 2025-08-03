@@ -182,7 +182,7 @@ export default function SettingsPage() {
                 <span className="text-sm font-medium">Account Status:</span>
                 <span
                   className={`text-sm px-2 py-1 rounded-full ${
-                    user.status === "active"
+                    user.status === "ACTIVE"
                       ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                       : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
                   }`}
@@ -204,7 +204,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Admin Settings */}
-          {user.role === "admin" && (
+          {user.role === "ADMIN" && (
             <Card>
               <CardHeader>
                 <CardTitle>Admin Settings</CardTitle>
