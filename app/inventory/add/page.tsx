@@ -42,7 +42,7 @@ export default function AddInventoryPage() {
   useEffect(() => {
     async function fetchCategories() {
       try {
-        const res = await fetch("/api/category")
+        const res = await fetch("/api/categories")
         if (!res.ok) throw new Error("Failed to fetch categories")
         const data = await res.json()
         setCategories(data)
