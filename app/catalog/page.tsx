@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Search, Package } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 type InventoryItem = {
   id: string
@@ -39,7 +40,7 @@ export default function CatalogPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [categories, setCategories] = useState<string[]>([])
-  const [loading, setLoading] = useState(true) // <-- add loading state
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setLoading(true)
@@ -70,25 +71,23 @@ export default function CatalogPage() {
     return matchesSearch && matchesCategory
   })
 
-  // Render skeleton cards while loading
-  const renderSkeleton = () => {
-    // Create array of 6 placeholders
-    return Array.from({ length: 6 }).map((_, idx) => (
-      <Card key={idx} className="animate-pulse">
+  const renderSkeletonCards = () =>
+    Array.from({ length: 6 }).map((_, idx) => (
+      <Card key={idx}>
         <CardHeader>
-          <div className="h-6 w-40 bg-gray-300 rounded mb-2" />
-          <div className="h-4 w-24 bg-gray-300 rounded" />
+          <Skeleton className="h-5 w-2/3 mb-2" />
+          <Skeleton className="h-4 w-1/3" />
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <div className="h-4 w-20 bg-gray-300 rounded" />
-            <div className="h-4 w-16 bg-gray-300 rounded" />
-            <div className="h-4 w-24 bg-gray-300 rounded" />
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-4 w-full mt-2" />
           </div>
         </CardContent>
       </Card>
     ))
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -111,10 +110,14 @@ export default function CatalogPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
-              disabled={loading} // optionally disable while loading
+              disabled={loading}
             />
           </div>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory} disabled={loading}>
+          <Select
+            value={selectedCategory}
+            onValueChange={setSelectedCategory}
+            disabled={loading}
+          >
             <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
@@ -129,10 +132,10 @@ export default function CatalogPage() {
           </Select>
         </div>
 
-        {/* Items Grid */}
+        {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading
-            ? renderSkeleton()
+            ? renderSkeletonCards()
             : filteredItems.map((item) => (
                 <Card key={item.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
@@ -172,6 +175,7 @@ export default function CatalogPage() {
               ))}
         </div>
 
+        {/* Empty State */}
         {!loading && filteredItems.length === 0 && (
           <div className="text-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

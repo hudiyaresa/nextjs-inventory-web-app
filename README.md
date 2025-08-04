@@ -361,10 +361,8 @@ npm start
 * Password recovery option for users/admin before login
 * Ability to activate or deactivate user accounts
 * Display images for each inventory item
-* Enhanced UI/UX, including better skeleton loading view for items, cards, lists, and dashboard
 * Toggle between public and private views for enterprise use
 * Customer-focused features optimized for purchasing items (e.g., purpose-based recommendations, e-commerce integration)
-
 
 
 ## Current Error Documentation

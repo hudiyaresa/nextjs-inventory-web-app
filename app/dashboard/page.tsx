@@ -20,6 +20,7 @@ import {
   Pie,
   Cell,
 } from "recharts"
+import { Skeleton } from "@/components/ui/skeleton" // contoh skeleton component
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"]
 
@@ -28,52 +29,85 @@ export default function DashboardPage() {
   const router = useRouter()
 
   const [inventory, setInventory] = useState<any[]>([])
+  const [loadingInventory, setLoadingInventory] = useState(true)
+
+  // States untuk tiap card
+  const [totalItems, setTotalItems] = useState<number | null>(null)
+  const [totalValue, setTotalValue] = useState<number | null>(null)
+  const [categoriesCount, setCategoriesCount] = useState<number | null>(null)
+  const [lowStockItems, setLowStockItems] = useState<number | null>(null)
+  const [chartData, setChartData] = useState<any[]>([])
+  const [pieData, setPieData] = useState<any[]>([])
 
   useEffect(() => {
     if (!isLoading && !user) {
       router.push("/signin")
     }
+  }, [isLoading, user, router])
 
+  useEffect(() => {
     const fetchInventory = async () => {
+      setLoadingInventory(true)
       try {
         const res = await fetch("/api/inventory/summary")
         const data = await res.json()
         setInventory(data)
+        setLoadingInventory(false)
       } catch (error) {
         console.error("Failed to load inventory:", error)
+        setLoadingInventory(false)
       }
     }
 
     fetchInventory()
-  }, [user, isLoading, router])
+  }, [])
 
-  if (isLoading) return <div>Loading...</div>
+  // Proses data tiap bagian secara terpisah setelah inventory siap
+  useEffect(() => {
+    if (!loadingInventory && inventory.length > 0) {
+      const safeInventory = Array.isArray(inventory) ? inventory : []
+
+      // Total Items
+      setTotalItems(safeInventory.reduce((sum, item) => sum + (item.quantity || 0), 0))
+
+      // Total Value
+      setTotalValue(
+        safeInventory.reduce(
+          (sum, item) => sum + (item.quantity || 0) * (parseFloat(item.unitPrice || 0)),
+          0,
+        ),
+      )
+
+      // Categories Count
+      const categoryData = safeInventory.reduce((acc: Record<string, number>, item) => {
+        const cat = item.category?.name || "Unknown"
+        acc[cat] = (acc[cat] || 0) + (item.quantity || 0)
+        return acc
+      }, {})
+      setCategoriesCount(Object.keys(categoryData).length)
+
+      // Low Stock Items
+      setLowStockItems(safeInventory.filter((item) => item.quantity < 10).length)
+
+      // Chart data
+      setChartData(
+        Object.entries(categoryData).map(([category, quantity]) => ({
+          category,
+          quantity,
+        })),
+      )
+
+      setPieData(
+        Object.entries(categoryData).map(([category, quantity]) => ({
+          name: category,
+          value: quantity,
+        })),
+      )
+    }
+  }, [loadingInventory, inventory])
+
+  if (isLoading) return <div>Loading user...</div>
   if (!user) return null
-
-  const safeInventory = Array.isArray(inventory) ? inventory : []
-
-  const totalItems = safeInventory.reduce((sum, item) => sum + (item.quantity || 0), 0)
-  const totalValue = safeInventory.reduce(
-    (sum, item) => sum + (item.quantity || 0) * (parseFloat(item.unitPrice || 0)),
-    0,
-  )
-  const lowStockItems = safeInventory.filter((item) => item.quantity < 10).length
-
-  const categoryData = safeInventory.reduce((acc, item) => {
-    const cat = item.category?.name || "Unknown"
-    acc[cat] = (acc[cat] || 0) + (item.quantity || 0)
-    return acc
-  }, {} as Record<string, number>)
-
-  const chartData = Object.entries(categoryData).map(([category, quantity]) => ({
-    category,
-    quantity,
-  }))
-
-  const pieData = Object.entries(categoryData).map(([category, quantity]) => ({
-    name: category,
-    value: quantity,
-  }))
 
   return (
     <div className="min-h-screen bg-background">
@@ -87,49 +121,77 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Total Items Card */}
           <Card>
             <CardHeader className="flex justify-between">
               <CardTitle className="text-sm font-medium">Total Items</CardTitle>
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalItems}</div>
-              <p className="text-xs text-muted-foreground">
-                Across {safeInventory.length} products
-              </p>
+              {totalItems === null ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{totalItems}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Across {inventory.length} products
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
+          {/* Total Value Card */}
           <Card>
             <CardHeader className="flex justify-between">
               <CardTitle className="text-sm font-medium">Total Value</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalValue.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">Inventory worth</p>
+              {totalValue === null ? (
+                <Skeleton className="h-8 w-24" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">${totalValue.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground">Inventory worth</p>
+                </>
+              )}
             </CardContent>
           </Card>
 
+          {/* Categories Count Card */}
           <Card>
             <CardHeader className="flex justify-between">
               <CardTitle className="text-sm font-medium">Categories</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{Object.keys(categoryData).length}</div>
-              <p className="text-xs text-muted-foreground">Different categories</p>
+              {categoriesCount === null ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{categoriesCount}</div>
+                  <p className="text-xs text-muted-foreground">Different categories</p>
+                </>
+              )}
             </CardContent>
           </Card>
 
+          {/* Low Stock Items Card */}
           <Card>
             <CardHeader className="flex justify-between">
               <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{lowStockItems}</div>
-              <p className="text-xs text-muted-foreground">Items below 10 units</p>
+              {lowStockItems === null ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{lowStockItems}</div>
+                  <p className="text-xs text-muted-foreground">Items below 10 units</p>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -141,15 +203,19 @@ export default function DashboardPage() {
               <CardDescription>Distribution of inventory items</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="category" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="quantity" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
+              {chartData.length === 0 ? (
+                <Skeleton className="h-[300px] w-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="category" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="quantity" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </CardContent>
           </Card>
 
@@ -159,23 +225,27 @@ export default function DashboardPage() {
               <CardDescription>Percentage breakdown by category</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              {pieData.length === 0 ? (
+                <Skeleton className="h-[300px] w-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      dataKey="value"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </CardContent>
           </Card>
         </div>
