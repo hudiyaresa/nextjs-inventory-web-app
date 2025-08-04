@@ -1,23 +1,71 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Navbar } from "@/components/navbar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { mockInventoryItems, categories } from "@/lib/inventory-data"
 import { Search, Package } from "lucide-react"
 
-export default function CatalogPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState<string>("all")
+type InventoryItem = {
+  id: string
+  itemName: string
+  brand: string
+  category: {
+    id: string
+    name: string
+  }
+  quantity: number
+  unitPrice?: number
+  source: string
+  description?: string
+}
 
-  const filteredItems = mockInventoryItems.filter((item) => {
+export default function CatalogPage() {
+  const [items, setItems] = useState<InventoryItem[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [categories, setCategories] = useState<string[]>([])
+
+  useEffect(() => {
+    // Fetch inventory items
+    fetch("/api/inventory")
+      .then((res) => res.json())
+      .then((data: InventoryItem[]) => {
+        setItems(data)
+
+        // Extract unique categories from the data
+        const uniqueCategories = Array.from(
+          new Set(data.map((item) => item.category.name))
+        )
+        setCategories(uniqueCategories)
+      })
+      .catch((error) => {
+        console.error("Failed to fetch inventory:", error)
+      })
+  }, [])
+
+  const filteredItems = items.filter((item) => {
     const matchesSearch =
       item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.brand.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory
+
+    const matchesCategory =
+      selectedCategory === "all" || item.category.name === selectedCategory
+
     return matchesSearch && matchesCategory
   })
 
@@ -28,7 +76,9 @@ export default function CatalogPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Public Inventory Catalog</h1>
-          <p className="text-muted-foreground">Browse our available inventory items. No login required.</p>
+          <p className="text-muted-foreground">
+            Browse our available inventory items. No login required.
+          </p>
         </div>
 
         {/* Filters */}
@@ -42,7 +92,10 @@ export default function CatalogPage() {
               className="pl-10"
             />
           </div>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <Select
+            value={selectedCategory}
+            onValueChange={setSelectedCategory}
+          >
             <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
@@ -60,36 +113,51 @@ export default function CatalogPage() {
         {/* Items Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredItems.map((item) => (
-            <Card key={item.id} className="hover:shadow-lg transition-shadow">
+            <Card
+              key={item.id}
+              className="hover:shadow-lg transition-shadow"
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-2">
                     <Package className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg">{item.itemName}</CardTitle>
+                    <CardTitle className="text-lg">
+                      {item.itemName}
+                    </CardTitle>
                   </div>
-                  <Badge variant="secondary">{item.category}</Badge>
+                  <Badge variant="secondary">{item.category.name}</Badge>
                 </div>
                 <CardDescription>{item.brand}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Quantity:</span>
+                    <span className="text-sm text-muted-foreground">
+                      Quantity:
+                    </span>
                     <span className="font-medium">{item.quantity}</span>
                   </div>
-                  {item.unitPrice && (
+                  {item.unitPrice !== undefined && (
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Unit Price:</span>
+                      <span className="text-sm text-muted-foreground">
+                        Unit Price:
+                      </span>
                       <span className="font-medium">${item.unitPrice}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Source:</span>
+                    <span className="text-sm text-muted-foreground">
+                      Source:
+                    </span>
                     <Badge variant="outline" className="capitalize">
                       {item.source}
                     </Badge>
                   </div>
-                  {item.description && <p className="text-sm text-muted-foreground mt-2">{item.description}</p>}
+                  {item.description && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {item.description}
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -100,7 +168,9 @@ export default function CatalogPage() {
           <div className="text-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">No items found</h3>
-            <p className="text-muted-foreground">Try adjusting your search terms or category filter.</p>
+            <p className="text-muted-foreground">
+              Try adjusting your search terms or category filter.
+            </p>
           </div>
         )}
       </div>
