@@ -353,9 +353,21 @@ npm start
    ```
 5. Submit a Pull Request
 
+
+## Future Improvement Features
+
+* Admin panel for managing users
+* Profile settings for each user
+* Password recovery option for users/admin before login
+* Ability to activate or deactivate user accounts
+* Display images for each inventory item
+* Enhanced UI/UX, including better skeleton loading view for items, cards, lists, and dashboard
+* Toggle between public and private views for enterprise use
+* Customer-focused features optimized for purchasing items (e.g., purpose-based recommendations, e-commerce integration)
+
+
+
 ## Current Error Documentation
-![Neon_DB](docs/neon_db_stats.png)
+![Error Page](docs/error_page.png)
 
-![Oauth_Error](docs/Oauth_Error.gif)
-
-update: current bug, we can login via google and email locally, but cannot login via vercel deploy...
+Update: A current bug occasionally causes an error to appear on the page (as shown in the image above). Simply refreshing or reloading the page will resolve the issue.
