@@ -39,22 +39,23 @@ export default function CatalogPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [categories, setCategories] = useState<string[]>([])
+  const [loading, setLoading] = useState(true) // <-- add loading state
 
   useEffect(() => {
-    // Fetch inventory items
+    setLoading(true)
     fetch("/api/inventory")
       .then((res) => res.json())
       .then((data: InventoryItem[]) => {
         setItems(data)
-
-        // Extract unique categories from the data
         const uniqueCategories = Array.from(
           new Set(data.map((item) => item.category.name))
         )
         setCategories(uniqueCategories)
+        setLoading(false)
       })
       .catch((error) => {
         console.error("Failed to fetch inventory:", error)
+        setLoading(false)
       })
   }, [])
 
@@ -68,6 +69,26 @@ export default function CatalogPage() {
 
     return matchesSearch && matchesCategory
   })
+
+  // Render skeleton cards while loading
+  const renderSkeleton = () => {
+    // Create array of 6 placeholders
+    return Array.from({ length: 6 }).map((_, idx) => (
+      <Card key={idx} className="animate-pulse">
+        <CardHeader>
+          <div className="h-6 w-40 bg-gray-300 rounded mb-2" />
+          <div className="h-4 w-24 bg-gray-300 rounded" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="h-4 w-20 bg-gray-300 rounded" />
+            <div className="h-4 w-16 bg-gray-300 rounded" />
+            <div className="h-4 w-24 bg-gray-300 rounded" />
+          </div>
+        </CardContent>
+      </Card>
+    ))
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,12 +111,10 @@ export default function CatalogPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
+              disabled={loading} // optionally disable while loading
             />
           </div>
-          <Select
-            value={selectedCategory}
-            onValueChange={setSelectedCategory}
-          >
+          <Select value={selectedCategory} onValueChange={setSelectedCategory} disabled={loading}>
             <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
@@ -112,59 +131,48 @@ export default function CatalogPage() {
 
         {/* Items Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map((item) => (
-            <Card
-              key={item.id}
-              className="hover:shadow-lg transition-shadow"
-            >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Package className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg">
-                      {item.itemName}
-                    </CardTitle>
-                  </div>
-                  <Badge variant="secondary">{item.category.name}</Badge>
-                </div>
-                <CardDescription>{item.brand}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Quantity:
-                    </span>
-                    <span className="font-medium">{item.quantity}</span>
-                  </div>
-                  {item.unitPrice !== undefined && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Unit Price:
-                      </span>
-                      <span className="font-medium">${item.unitPrice}</span>
+          {loading
+            ? renderSkeleton()
+            : filteredItems.map((item) => (
+                <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Package className="h-5 w-5 text-primary" />
+                        <CardTitle className="text-lg">{item.itemName}</CardTitle>
+                      </div>
+                      <Badge variant="secondary">{item.category.name}</Badge>
                     </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Source:
-                    </span>
-                    <Badge variant="outline" className="capitalize">
-                      {item.source}
-                    </Badge>
-                  </div>
-                  {item.description && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {item.description}
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    <CardDescription>{item.brand}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Quantity:</span>
+                        <span className="font-medium">{item.quantity}</span>
+                      </div>
+                      {item.unitPrice !== undefined && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Unit Price:</span>
+                          <span className="font-medium">${item.unitPrice}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Source:</span>
+                        <Badge variant="outline" className="capitalize">
+                          {item.source}
+                        </Badge>
+                      </div>
+                      {item.description && (
+                        <p className="text-sm text-muted-foreground mt-2">{item.description}</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
         </div>
 
-        {filteredItems.length === 0 && (
+        {!loading && filteredItems.length === 0 && (
           <div className="text-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">No items found</h3>
